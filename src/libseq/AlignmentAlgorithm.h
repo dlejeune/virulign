@@ -49,6 +49,11 @@ class AlignmentAlgorithm {
      * From: ftp://ftp.ncbi.nih.gov/blast/matrices/BLOSUM30
      */
     static double** BLOSUM30();
+
+    /**
+     * Parse a similarity matrix from a file.
+     */
+     static double** parseMatrix(const std::string& filename);
   };
 
 }

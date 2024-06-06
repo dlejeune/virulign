@@ -1,4 +1,6 @@
 #include "AlignmentAlgorithm.h"
+#include <iostream>
+#include <fstream>
 
 namespace seq {
 
@@ -62,5 +64,82 @@ double** AlignmentAlgorithm::BLOSUM30()
 
   return mat;
 }
+
+double** AlignmentAlgorithm::parseMatrix(const std::string &filename) {
+    // Open the file
+    std::ifstream file(filename);
+
+    // Check if the file was successfully opened
+    if (!file.is_open()) {
+        std::cerr << "Error: Could not open file " << filename << std::endl;
+        return nullptr;
+    }
+
+    // Consume all lines with # at the beginning
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line[0] != '#') {
+            break;
+        }
+    }
+
+    // First line will tell us the order of the columns. It will also tell us the size of the array.
+    std::string expectedColOrder = "ARNDCQEGHILKMFPSTWYVBJZX*_";
+    int columnCounter = 0;
+
+    for (int i = 0; i < line.size(); i++){
+        if(line[i] != ' '  & line[i] != ','){
+            if(line[i] != expectedColOrder[columnCounter]){
+                std::cerr << "Error: Columns are not in the expected order. Received " << line[i] << " instead of " << expectedColOrder[columnCounter];
+                return nullptr;
+            }else{
+                columnCounter++;
+            }
+        }
+    }
+
+    cout << "Validation passed.\n";
+
+    double** outputTable = new double*[expectedColOrder.size()];
+
+    int rowCounter = 0;
+
+
+
+    // Consume the rest of the file
+    while (std::getline(file, line)) {
+
+        // Check that this row's amino acid is correctly aligned with the column order
+        if(line[0] == expectedColOrder[rowCounter]){
+            double* rowArray = new double[expectedColOrder.size()];
+            columnCounter = 0;
+            std::string value;
+
+            // We need to account for negatives, so we consume the next character until we come across a comma
+            // We can also start at position 2 since pos 0 is the AA and pos 1 is a comma
+            for(int i = 2; i < line.size(); i++){
+                if(line[i] != ','){
+                    value += line[i];
+                }else{
+                    // When we reach the next comma, we can convert the stored value to a double and put it in the array
+                    double valueDouble = std::stod(value.c_str());
+                    rowArray[columnCounter] = valueDouble;
+
+                    columnCounter ++;
+                    value = "";
+                }
+            }
+
+            outputTable[rowCounter] = rowArray;
+            rowCounter++;
+        }else{
+            std::cerr << "Error: The rows are not in the right order. They should match the column order.\n";
+            std::cerr << "Expected " << expectedColOrder[rowCounter] << " but got " << line[0] << " instead";
+        }
+    }
+
+
+    return outputTable;
+    }
 
 };
