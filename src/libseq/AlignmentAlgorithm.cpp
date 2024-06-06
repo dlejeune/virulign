@@ -98,7 +98,7 @@ double** AlignmentAlgorithm::parseMatrix(const std::string &filename) {
         }
     }
 
-    cout << "Validation passed.\n";
+    std::cout << "Validation passed.\n";
 
     double** outputTable = new double*[expectedColOrder.size()];
 

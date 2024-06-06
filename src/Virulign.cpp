@@ -6,6 +6,7 @@
 #include <iomanip>
 
 #include <NeedlemanWunsh.h>
+#include <AlignmentAlgorithm.h>
 
 #include "ReferenceSequence.h"
 #include "Alignment.h"
@@ -38,6 +39,7 @@ int main(int argc, char **argv) {
 	      << "  --maxFrameShifts intValue=>3" << std::endl
               << "  --progress [no yes]" << std::endl
               << "  --nt-debug directory" << std::endl
+              << "  --blosum-fil filename " << std::endl
 	      << "Output: The alignment will be printed to standard out and any progress or error messages will be printed to the standard error. This output can be redirected to files, e.g.:" << std::endl
               << "   virulign ref.xml sequence.fasta > alignment.mutations 2> alignment.err" << std::endl;
     exit(0);
@@ -79,6 +81,8 @@ int main(int argc, char **argv) {
   ExportKind exportKind = Mutations;
   ExportAlphabet exportAlphabet = AminoAcids;
   bool exportWithInsertions = true;
+  bool useCustomBLOSUM = false;
+  std::string blosumFile;
 
   double gapExtensionPenalty = 3.3;
   double gapOpenPenalty = 10.0;
@@ -152,6 +156,9 @@ int main(int argc, char **argv) {
         std::cerr << "Unkown value " << parameterValue << " for parameter : " << parameterName << std::endl;
         exit(0);
       }
+    } else if(equalsString(parameterName,"--blosum-file")) {
+        useCustomBLOSUM = true;
+        blosumFile = parameterValue;
     } else if(equalsString(parameterName,"--progress")) {
       if(equalsString(parameterValue,"yes")) {
 	progress = true;
@@ -170,8 +177,19 @@ int main(int argc, char **argv) {
   }
 	
   std::vector<Alignment> results;
- 
-  seq::NeedlemanWunsh algorithm(-gapOpenPenalty, -gapExtensionPenalty);
+
+  // Put a thing here about loading a blosum matrix
+  double** blosum = seq::AlignmentAlgorithm::BLOSUM30();
+  if (useCustomBLOSUM) {
+    blosum = seq::AlignmentAlgorithm::parseMatrix(blosumFile);
+  }
+
+  // TODO: allow this to be specified as well
+  double** ntWeightMatrix = seq::AlignmentAlgorithm::IUB();
+  seq::NeedlemanWunsh algorithm(-gapOpenPenalty,
+                                -gapExtensionPenalty,
+                                ntWeightMatrix,
+                                blosum);
 
   if (!ntDebugDir.empty()) {
 	seq::NTSequence r = refSeq;
