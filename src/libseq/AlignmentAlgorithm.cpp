@@ -84,7 +84,7 @@ double** AlignmentAlgorithm::parseMatrix(const std::string &filename) {
     }
 
     // First line will tell us the order of the columns. It will also tell us the size of the array.
-    std::string expectedColOrder = "ARNDCQEGHILKMFPSTWYVBJZX*_";
+    std::string expectedColOrder = "ARNDCQEGHILKMFPSTWYVBJZX*-";
     int columnCounter = 0;
 
     for (int i = 0; i < line.size(); i++){
@@ -97,8 +97,6 @@ double** AlignmentAlgorithm::parseMatrix(const std::string &filename) {
             }
         }
     }
-
-    std::cout << "Validation passed.\n";
 
     double** outputTable = new double*[expectedColOrder.size()];
 
