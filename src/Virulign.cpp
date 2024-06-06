@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 	      << "  --maxFrameShifts intValue=>3" << std::endl
               << "  --progress [no yes]" << std::endl
               << "  --nt-debug directory" << std::endl
-              << "  --blosum-fil filename " << std::endl
+              << "  --blosum-file filename " << std::endl
 	      << "Output: The alignment will be printed to standard out and any progress or error messages will be printed to the standard error. This output can be redirected to files, e.g.:" << std::endl
               << "   virulign ref.xml sequence.fasta > alignment.mutations 2> alignment.err" << std::endl;
     exit(0);
