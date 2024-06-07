@@ -6,11 +6,13 @@ namespace seq {
 
 NeedlemanWunsh::NeedlemanWunsh(double gapOpenScore,
 			       double gapExtensionScore,
+                   double edgeGapExtensionScore,
 			       double **ntWeightMatrix,
 			       double **aaWeightMatrix)
 {
   gapOpenScore_ = gapOpenScore;
   gapExtensionScore_ = gapExtensionScore;
+  edgeGapExtensionScore_ = edgeGapExtensionScore;
   ntWeightMatrix_ = ntWeightMatrix;
   aaWeightMatrix_ = aaWeightMatrix;
 }
@@ -64,7 +66,7 @@ double NeedlemanWunsh::needlemanWunshAlign(std::vector<Symbol>& seq1,
   for (unsigned i = 0; i < seq1Size+1; ++i)
     gapsLengthTable[i] = new int[seq2Size+1]; // >0: horiz, <0: vert
 
-  double edgeGapExtensionScore = 0;
+  double edgeGapExtensionScore_ = 0;
 
   /*
    * compute table
@@ -72,11 +74,11 @@ double NeedlemanWunsh::needlemanWunshAlign(std::vector<Symbol>& seq1,
   dnTable[0][0] = 0;
   gapsLengthTable[0][0] = 0;
   for (unsigned i = 1; i < seq1Size+1; ++i) {
-    dnTable[i][0] = dnTable[i-1][0] + edgeGapExtensionScore;
+    dnTable[i][0] = dnTable[i-1][0] + edgeGapExtensionScore_;
     gapsLengthTable[i][0] = gapsLengthTable[i-1][0] + 1;
   }
   for (unsigned j = 1; j < seq2Size+1; ++j) {
-    dnTable[0][j] = dnTable[0][j-1] + edgeGapExtensionScore;
+    dnTable[0][j] = dnTable[0][j-1] + edgeGapExtensionScore_;
     gapsLengthTable[0][j] = gapsLengthTable[0][j-1] - 1;
   }
 
@@ -87,14 +89,14 @@ double NeedlemanWunsh::needlemanWunshAlign(std::vector<Symbol>& seq1,
 	= dnTable[i-1][j-1]
 	+ weightMatrix[seq1[i-1].intRep()][seq2[j-1].intRep()];
 
-      double ges = (j == seq2Size) ? edgeGapExtensionScore : gapExtensionScore_;
+      double ges = (j == seq2Size) ? edgeGapExtensionScore_ : gapExtensionScore_;
 
       double horizGapScore = ((gapsLengthTable[i-1][j] > 0) || (j == seq2Size)
 			      ? ges : gapOpenScore_ + ges);
       double sgaphoriz
 	= dnTable[i-1][j] + horizGapScore;
 
-      ges = (i == seq1Size) ? edgeGapExtensionScore : gapExtensionScore_;
+      ges = (i == seq1Size) ? edgeGapExtensionScore_ : gapExtensionScore_;
 
       double vertGapScore = (gapsLengthTable[i][j-1] < 0 || (i == seq1Size)
 			     ? ges : gapOpenScore_ + ges);
@@ -163,16 +165,14 @@ double NeedlemanWunsh::computeAlignScore(const NTSequence& seq1,
 
   bool seq1LeadingGap = true;
   bool seq2LeadingGap = true;
-
-  double edgeGapExtensionScore = 0;
-  
+  // TODO: Check in on these Leading gap flags which are never set to anything else....
   for (unsigned i = 0; i < seq1.size(); ++i) {
     if (seq1[i] == Nucleotide::GAP) {
       ++seq1GapLength;
     } else {
       if (seq1GapLength) {
 	    if (seq1LeadingGap)
-	        score += seq1GapLength * edgeGapExtensionScore;
+	        score += seq1GapLength * edgeGapExtensionScore_;
 	    else
 	    score += gapOpenScore_ + seq1GapLength * gapExtensionScore_;
       }
@@ -183,7 +183,7 @@ double NeedlemanWunsh::computeAlignScore(const NTSequence& seq1,
       } else {
 	if (seq2GapLength) {
 	  if (seq2LeadingGap)
-	    score += seq2GapLength * edgeGapExtensionScore;
+	    score += seq2GapLength * edgeGapExtensionScore_;
 	  else
 	    score += gapOpenScore_ + seq2GapLength * gapExtensionScore_;
     }
@@ -194,8 +194,8 @@ double NeedlemanWunsh::computeAlignScore(const NTSequence& seq1,
     }
   }
 
-  score += seq1GapLength * edgeGapExtensionScore;
-  score += seq2GapLength * edgeGapExtensionScore;
+  score += seq1GapLength * edgeGapExtensionScore_;
+  score += seq2GapLength * edgeGapExtensionScore_;
 
   return score;
 }

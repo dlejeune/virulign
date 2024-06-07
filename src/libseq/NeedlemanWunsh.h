@@ -14,6 +14,7 @@ class NeedlemanWunsh : public AlignmentAlgorithm
   public:
     NeedlemanWunsh(double gapOpenScore = -10,
 		   double gapExtensionScore = -3.3,
+           double edgeGapExtensionScore = -0.0,
 		   double **ntWeightMatrix = 
 		   AlignmentAlgorithm::IUB(),
 		   double **aaWeightMatrix = 
@@ -50,6 +51,7 @@ class NeedlemanWunsh : public AlignmentAlgorithm
 private:
   double gapOpenScore_;
   double gapExtensionScore_;
+  double edgeGapExtensionScore_;
   double **ntWeightMatrix_;
   double **aaWeightMatrix_;
 

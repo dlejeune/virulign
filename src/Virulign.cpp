@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
 	      << "  --exportReferenceSequence [no yes]" << std::endl
 	      << "  --gapExtensionPenalty doubleValue=>3.3" << std::endl
 	      << "  --gapOpenPenalty doubleValue=>10.0" << std::endl
+          << "  --edgeGapExtensionScore doubleValue=>0.0" << std::endl
 	      << "  --maxFrameShifts intValue=>3" << std::endl
               << "  --progress [no yes]" << std::endl
               << "  --nt-debug directory" << std::endl
@@ -86,6 +87,8 @@ int main(int argc, char **argv) {
 
   double gapExtensionPenalty = 3.3;
   double gapOpenPenalty = 10.0;
+  double edgeGapExtensionScore = 0.0;
+
   int maxFrameShifts = 3;
 
   bool progress = false;
@@ -149,7 +152,14 @@ int main(int argc, char **argv) {
         std::cerr << "Unkown value " << parameterValue << " for parameter : " << parameterName << std::endl;
         exit(0);
       }
-    } else if(equalsString(parameterName,"--maxFrameShifts")) {
+    }  else if(equalsString(parameterName,"--edgeGapExtensionScore")) {
+        try {
+            edgeGapExtensionScore = lexical_cast<double>(parameterValue);
+        } catch (std::bad_cast& e) {
+            std::cerr << "Unkown value " << parameterValue << " for parameter : " << parameterName << std::endl;
+            exit(0);
+        }
+    }else if(equalsString(parameterName,"--maxFrameShifts")) {
       try {
         maxFrameShifts = lexical_cast<int>(parameterValue);
       } catch (std::bad_cast& e) {
@@ -188,6 +198,7 @@ int main(int argc, char **argv) {
   double** ntWeightMatrix = seq::AlignmentAlgorithm::IUB();
   seq::NeedlemanWunsh algorithm(-gapOpenPenalty,
                                 -gapExtensionPenalty,
+                                -edgeGapExtensionScore,
                                 ntWeightMatrix,
                                 blosum);
 
